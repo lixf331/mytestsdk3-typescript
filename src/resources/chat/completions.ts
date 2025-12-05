@@ -1,0 +1,844 @@
+// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+
+import { APIResource } from '../../core/resource';
+import * as CompletionsAPI from './completions';
+import { APIPromise } from '../../core/api-promise';
+import { RequestOptions } from '../../internal/request-options';
+
+export class Completions extends APIResource {
+  /**
+   * OpenAI-compatible chat completion endpoint.
+   *
+   * @example
+   * ```ts
+   * const completion = await client.chat.completions.create({
+   *   messages: [
+   *     {
+   *       content: 'Explain the importance of low latency LLMs',
+   *       role: 'user',
+   *     },
+   *   ],
+   *   model: 'meta-llama/Llama-3.3-70B-Instruct',
+   * });
+   * ```
+   */
+  create(body: CompletionCreateParams, options?: RequestOptions): APIPromise<CompletionCreateResponse> {
+    return this._client.post('/openai/v1/chat/completions', { body, ...options });
+  }
+}
+
+export interface ChatCompletionContentPartTextParam {
+  text: string;
+
+  type: 'text';
+}
+
+export interface ChatCompletionLogProb {
+  /**
+   * The token.
+   */
+  token: string;
+
+  /**
+   * The log probability of the token.
+   */
+  logprob: number;
+
+  /**
+   * A list of integers representing the UTF-8 bytes representation of the token.
+   */
+  bytes?: Array<number> | null;
+}
+
+export interface FunctionCall {
+  arguments: string;
+
+  name: string;
+}
+
+/**
+ * Represents a chat completion response returned by model, based on the provided
+ * input.
+ */
+export interface CompletionCreateResponse {
+  /**
+   * A unique identifier for the chat completion.
+   */
+  id: string;
+
+  /**
+   * A list of chat completion choices. Can be more than one if `n` is greater
+   * than 1.
+   */
+  choices: Array<CompletionCreateResponse.Choice>;
+
+  /**
+   * The Unix timestamp (in seconds) of when the chat completion was created.
+   */
+  created: number;
+
+  /**
+   * The model used for the chat completion.
+   */
+  model: string;
+
+  /**
+   * The object type, which is always `chat.completion`.
+   */
+  object: 'chat.completion';
+
+  /**
+   * KVTransfer parameters.
+   */
+  kv_transfer_params?: { [key: string]: unknown } | null;
+
+  /**
+   * Array of dictionaries or null values, where each dictionary maps token index (as
+   * string) to a Logprob object containing log probability, rank, and decoded token
+   * information. Each element can be a dictionary (dict[int, Logprob]) or null. The
+   * entire field can also be null. The length of this array should match the number
+   * of prompt tokens reported in the usage statistics.
+   */
+  prompt_logprobs?: Array<{ [key: string]: CompletionCreateResponse.Logprob }>;
+
+  /**
+   * Array of token IDs representing how the prompt was tokenized by the model's
+   * tokenizer. Each integer corresponds to a token ID in the tokenizer's vocabulary.
+   * This field is useful for debugging tokenization, verifying token counts against
+   * `usage.prompt_tokens`, and performing token-level analysis. The length of this
+   * array should match the number of prompt tokens reported in the usage statistics.
+   */
+  prompt_token_ids?: Array<number>;
+
+  /**
+   * The service tier used for the request.
+   */
+  service_tier?: 'auto' | 'default' | 'flex' | 'scale' | 'priority';
+
+  /**
+   * This fingerprint represents the backend configuration that the model runs with.
+   *
+   * Can be used in conjunction with the `seed` request parameter to understand when
+   * backend changes have been made that might impact determinism.
+   */
+  system_fingerprint?: string;
+
+  /**
+   * Usage statistics for the completion request.
+   */
+  usage?: CompletionCreateResponse.Usage;
+}
+
+export namespace CompletionCreateResponse {
+  export interface Choice {
+    /**
+     * The index of the choice in the list of choices.
+     */
+    index: number;
+
+    message: Choice.Message;
+
+    /**
+     * The reason the model stopped generating tokens.
+     */
+    finish_reason?: string | null;
+
+    /**
+     * Log probability information for the choice.
+     */
+    logprobs?: Choice.Logprobs | null;
+
+    /**
+     * Not part of OpenAI spec but included for legacy reasons.
+     */
+    stop_reason?: number | string | null;
+
+    /**
+     * Not part of OpenAI spec but useful for tracing tokens in agent scenarios.
+     */
+    token_ids?: Array<number> | null;
+  }
+
+  export namespace Choice {
+    export interface Message {
+      /**
+       * The role of the author of this message.
+       */
+      role: string;
+
+      /**
+       * OpenAI annotation information.
+       */
+      annotations?: { [key: string]: unknown } | null;
+
+      /**
+       * OpenAI chat completion audio information.
+       */
+      audio?: { [key: string]: unknown } | null;
+
+      /**
+       * The content of the message.
+       */
+      content?: string | null;
+
+      /**
+       * Deprecated function call information.
+       */
+      function_call?: CompletionsAPI.FunctionCall | null;
+
+      /**
+       * Reasoning content generated by the model.
+       */
+      reasoning?: string | null;
+
+      /**
+       * Reasoning content generated by the model.
+       */
+      reasoning_content?: string | null;
+
+      /**
+       * Refusal message if the model refuses to respond.
+       */
+      refusal?: string | null;
+
+      /**
+       * List of tool calls made by the model.
+       */
+      tool_calls?: Array<Message.ToolCall>;
+    }
+
+    export namespace Message {
+      export interface ToolCall {
+        /**
+         * The ID of the tool call.
+         */
+        id: string;
+
+        function: CompletionsAPI.FunctionCall;
+
+        /**
+         * The type of the tool. Currently, only function is supported.
+         */
+        type: 'function';
+      }
+    }
+
+    /**
+     * Log probability information for the choice.
+     */
+    export interface Logprobs {
+      /**
+       * A list of message content tokens with log probability information.
+       */
+      content?: Array<Logprobs.Content> | null;
+    }
+
+    export namespace Logprobs {
+      export interface Content extends CompletionsAPI.ChatCompletionLogProb {
+        /**
+         * List of top log probabilities for alternative tokens.
+         */
+        top_logprobs?: Array<CompletionsAPI.ChatCompletionLogProb>;
+      }
+    }
+  }
+
+  export interface Logprob {
+    /**
+     * The logprob of chosen token.
+     */
+    logprob: number;
+
+    /**
+     * The decoded chosen token index
+     */
+    decoded_token?: string | null;
+
+    /**
+     * The vocab rank of chosen token (>=1).
+     */
+    rank?: number | null;
+  }
+
+  /**
+   * Usage statistics for the completion request.
+   */
+  export interface Usage {
+    /**
+     * Number of tokens in the prompt.
+     */
+    prompt_tokens: number;
+
+    /**
+     * Total number of tokens used in the request (prompt + completion).
+     */
+    total_tokens: number;
+
+    /**
+     * Number of tokens in the generated completion.
+     */
+    completion_tokens?: number | null;
+
+    /**
+     * Breakdown of tokens in the prompt.
+     */
+    prompt_tokens_details?: Usage.PromptTokensDetails | null;
+  }
+
+  export namespace Usage {
+    /**
+     * Breakdown of tokens in the prompt.
+     */
+    export interface PromptTokensDetails {
+      /**
+       * Number of tokens that were cached and reused.
+       */
+      cached_tokens?: number | null;
+    }
+  }
+}
+
+export interface CompletionCreateParams {
+  /**
+   * A list of messages comprising the conversation so far.
+   */
+  messages: Array<
+    | CompletionCreateParams.ChatCompletionDeveloperMessageParam
+    | CompletionCreateParams.ChatCompletionSystemMessageParam
+    | CompletionCreateParams.ChatCompletionUserMessageParam
+    | CompletionCreateParams.ChatCompletionAssistantMessageParam
+    | CompletionCreateParams.ChatCompletionToolMessageParam
+    | CompletionCreateParams.ChatCompletionFunctionMessageParam
+  >;
+
+  /**
+   * ID of the model to use.
+   */
+  model: string;
+
+  /**
+   * Whitelist of token IDs that can be generated. Only tokens in this list will be
+   * considered during sampling. If specified, all other tokens are excluded. Useful
+   * for constrained generation, structured output, or limiting output to specific
+   * vocabulary (e.g., only numbers, only specific keywords). If null, all tokens are
+   * allowed.
+   */
+  allowed_token_ids?: Array<number> | null;
+
+  /**
+   * Generate multiple completions and return the best one. Ignored when n is set.
+   */
+  best_of?: number | null;
+
+  /**
+   * Additional keyword args to pass to the template renderer. Will be accessible by
+   * the chat template.
+   */
+  chat_template_kwargs?: { [key: string]: unknown } | null;
+
+  /**
+   * Additional model-specific or implementation-specific arguments not covered by
+   * standard parameters. This allows passing custom parameters that may be specific
+   * to certain models or backends. The structure and accepted keys depend on the
+   * model and implementation being used.
+   */
+  extra_args?: { [key: string]: unknown } | null;
+
+  /**
+   * Number between -2.0 and 2.0. Positive values penalize new tokens based on their
+   * existing frequency in the text so far, decreasing the model's likelihood to
+   * repeat the same line verbatim.
+   */
+  frequency_penalty?: number | null;
+
+  /**
+   * If true, ignore the EOS (End of Sequence) token and continue generating. When
+   * false, generation stops when EOS token is encountered.
+   */
+  ignore_eos?: boolean | null;
+
+  /**
+   * If true, the stop sequence that triggered the stop will be included in the
+   * output text. By default (false), stop sequences are removed from the output.
+   */
+  include_stop_str_in_output?: boolean | null;
+
+  /**
+   * Modify the likelihood of specified tokens appearing in the completion.
+   *
+   * Accepts a JSON object that maps tokens (specified by their token ID in the
+   * tokenizer) to an associated bias value from -100 to 100. Mathematically, the
+   * bias is added to the logits generated by the model prior to sampling. The exact
+   * effect will vary per model, but values between -1 and 1 should decrease or
+   * increase likelihood of selection; values like -100 or 100 should result in a ban
+   * or exclusive selection of the relevant token.
+   */
+  logit_bias?: { [key: string]: number } | null;
+
+  /**
+   * A list of either qualified names of logits processors, or constructor objects,
+   * to apply when sampling. A constructor is a JSON object with a required
+   * 'qualname' field specifying the qualified name of the processor class/factory,
+   * and optional 'args' and 'kwargs' fields containing positional and keyword
+   * arguments. For example: {'qualname': 'my_module.MyLogitsProcessor', 'args': [1,
+   * 2], 'kwargs': {'param': 'value'}}.
+   */
+  logits_processors?: Array<string | CompletionCreateParams.LogitsProcessorConstructor> | null;
+
+  /**
+   * Whether to return log probabilities of the output tokens or not. If true,
+   * returns the log probabilities of each output token returned in the `content` of
+   * `message`.
+   */
+  logprobs?: boolean | null;
+
+  /**
+   * The maximum number of tokens that can be generated in the chat completion. The
+   * total length of input tokens and generated tokens is limited by the model's
+   * context length.
+   */
+  max_tokens?: number | null;
+
+  /**
+   * Minimum probability threshold relative to the most likely token. Only tokens
+   * with probability >= (max_probability \* min_p) are considered. For example, if
+   * the top token has probability 0.4 and min_p=0.1, only tokens with probability >=
+   * 0.04 are sampled.
+   */
+  min_p?: number | null;
+
+  /**
+   * The minimum number of tokens to generate. Generation will continue until at
+   * least this many tokens are produced, even if stop sequences or EOS tokens are
+   * encountered. Useful for ensuring a minimum response length.
+   */
+  min_tokens?: number | null;
+
+  /**
+   * How many chat completion choices to generate for each input message.
+   */
+  n?: number | null;
+
+  /**
+   * Controls the format of streaming output for incremental text generation. -
+   * cumulative: Return the full accumulated text so far (default for most use
+   * cases). - delta: Return only the newly generated tokens since the last update
+   * (useful for streaming UIs). - final_only: Return only the complete final
+   * response, no intermediate updates.
+   */
+  output_kind?: 'cumulative' | 'delta' | 'final_only' | null;
+
+  /**
+   * Number between -2.0 and 2.0. Positive values penalize new tokens based on
+   * whether they appear in the text so far, increasing the model's likelihood to
+   * talk about new topics.
+   */
+  presence_penalty?: number | null;
+
+  /**
+   * Number of most likely tokens to return at each prompt token position, from the
+   * end of the prompt. For example, prompt_logprobs=5 will return the top 5 most
+   * likely tokens and their log probabilities for the last 5 tokens in the prompt.
+   * Useful for analyzing model confidence on input.
+   */
+  prompt_logprobs?: number | null;
+
+  /**
+   * Controls the amount of reasoning effort the model applies when generating
+   * responses. Higher values typically result in more thorough reasoning but may
+   * increase latency and cost.
+   */
+  reasoning_effort?: 'low' | 'medium' | 'high' | null;
+
+  /**
+   * Penalty for repeating tokens. Values > 1.0 reduce repetition. Default is 1.0 (no
+   * penalty). Higher values (e.g., 1.2) make the model less likely to repeat the
+   * same token.
+   */
+  repetition_penalty?: number | null;
+
+  /**
+   * Specifies the format of the response. Controls how the model structures its
+   * output. - text: Plain text output (default) - json_object: Ensures the response
+   * is valid JSON - json_schema: Validates response against a JSON schema -
+   * structural_tag: Uses custom structural tags for structured output
+   */
+  response_format?:
+    | CompletionCreateParams.ResponseFormat
+    | CompletionCreateParams.StructuralTagResponseFormat
+    | null;
+
+  /**
+   * If specified, our system will make a best effort to sample deterministically,
+   * such that repeated requests with the same `seed` and parameters should return
+   * the same result.
+   */
+  seed?: number | null;
+
+  /**
+   * Whether to skip special tokens (e.g., BOS, EOS, padding tokens) in the output
+   * text. If true, special tokens are filtered out from the response. If false,
+   * special tokens are included in the output, which may be useful for debugging or
+   * token-level analysis.
+   */
+  skip_special_tokens?: boolean | null;
+
+  /**
+   * Whether to add spaces between special tokens when decoding. If true, spaces are
+   * inserted between special tokens in the output. If false, special tokens are
+   * concatenated without spaces. This affects the formatting of the decoded text
+   * output.
+   */
+  spaces_between_special_tokens?: boolean | null;
+
+  /**
+   * where the API will stop generating further tokens. The returned text will not
+   * contain the stop sequence.
+   */
+  stop?: string | null | Array<string>;
+
+  /**
+   * List of token IDs where the API will stop generating further tokens. The
+   * returned text will not contain these tokens. Useful when you know specific token
+   * IDs to stop at (e.g., end-of-text tokens).
+   */
+  stop_token_ids?: Array<number> | null;
+
+  /**
+   * If set, partial message deltas will be sent. Tokens will be sent as data-only
+   * [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format)
+   * as they become available, with the stream terminated by a `data: [DONE]`
+   * message.
+   */
+  stream?: boolean | null;
+
+  /**
+   * Options for controlling streaming behavior. Only used when stream is true.
+   * Controls whether usage statistics are included and how they are reported during
+   * streaming.
+   */
+  stream_options?: CompletionCreateParams.StreamOptions | null;
+
+  /**
+   * What sampling temperature to use, between 0 and 2. Higher values like 0.8 will
+   * make the output more random, while lower values like 0.2 will make it more
+   * focused and deterministic. We generally recommend altering this or top_p but not
+   * both.
+   */
+  temperature?: number | null;
+
+  /**
+   * Controls which (if any) tool is called by the model. `none` means the model will
+   * not call any tool and instead generates a message. `auto` means the model can
+   * pick between generating a message or calling one or more tools. `required` means
+   * the model must call one or more tools. Specifying a particular tool via
+   * `{"type": "function", "function": {"name": "my_function"}}` forces the model to
+   * call that tool.
+   *
+   * `none` is the default when no tools are present. `auto` is the default if tools
+   * are present.
+   */
+  tool_choice?:
+    | 'none'
+    | 'auto'
+    | 'required'
+    | CompletionCreateParams.ChatCompletionNamedToolChoiceParam
+    | null;
+
+  /**
+   * A list of tools (functions) the model may call. The model can choose to call one
+   * or more of these functions during the conversation. Each tool defines a function
+   * with a name, description, and parameters (JSON schema). The model will generate
+   * function calls in a structured format when it determines a function should be
+   * invoked.
+   */
+  tools?: Array<CompletionCreateParams.Tool> | null;
+
+  /**
+   * Limit sampling to the top K most likely tokens. For example, top_k=10 means only
+   * the 10 most probable tokens are considered. Lower values make output more
+   * focused, higher values more diverse.
+   */
+  top_k?: number | null;
+
+  /**
+   * An alternative to sampling with temperature, called nucleus sampling, where the
+   * model considers the results of the tokens with top_p probability mass. So 0.1
+   * means only the tokens comprising the top 10% probability mass are considered. We
+   * generally recommend altering this or temperature but not both.
+   */
+  top_p?: number | null;
+
+  /**
+   * Maximum number of prompt tokens to keep. If prompt exceeds this limit, tokens
+   * will be truncated. Use -1 to disable truncation. Positive values truncate from
+   * the beginning, keeping the end. Useful when prompt is too long for the model's
+   * context window.
+   */
+  truncate_prompt_tokens?: number | null;
+}
+
+export namespace CompletionCreateParams {
+  export interface ChatCompletionDeveloperMessageParam {
+    content: string | Array<CompletionsAPI.ChatCompletionContentPartTextParam>;
+
+    role: 'developer';
+
+    name?: string;
+  }
+
+  export interface ChatCompletionSystemMessageParam {
+    content: string | Array<CompletionsAPI.ChatCompletionContentPartTextParam>;
+
+    role: 'system';
+
+    name?: string;
+  }
+
+  export interface ChatCompletionUserMessageParam {
+    content:
+      | string
+      | Array<
+          | CompletionsAPI.ChatCompletionContentPartTextParam
+          | ChatCompletionUserMessageParam.ChatCompletionContentPartImageParam
+          | ChatCompletionUserMessageParam.ChatCompletionContentPartInputAudioParam
+          | ChatCompletionUserMessageParam.File
+        >;
+
+    role: 'user';
+
+    name?: string;
+  }
+
+  export namespace ChatCompletionUserMessageParam {
+    export interface ChatCompletionContentPartImageParam {
+      image_url: ChatCompletionContentPartImageParam.ImageURL;
+
+      type: 'image_url';
+    }
+
+    export namespace ChatCompletionContentPartImageParam {
+      export interface ImageURL {
+        url: string;
+
+        detail?: 'auto' | 'low' | 'high';
+      }
+    }
+
+    export interface ChatCompletionContentPartInputAudioParam {
+      input_audio: ChatCompletionContentPartInputAudioParam.InputAudio;
+
+      type: 'input_audio';
+    }
+
+    export namespace ChatCompletionContentPartInputAudioParam {
+      export interface InputAudio {
+        data: string;
+
+        format: 'wav' | 'mp3';
+      }
+    }
+
+    export interface File {
+      file: File.File;
+
+      type: 'file';
+    }
+
+    export namespace File {
+      export interface File {
+        file_data?: string;
+
+        file_id?: string;
+
+        filename?: string;
+      }
+    }
+  }
+
+  export interface ChatCompletionAssistantMessageParam {
+    role: 'assistant';
+
+    audio?: ChatCompletionAssistantMessageParam.Audio | null;
+
+    content?:
+      | string
+      | Array<
+          | CompletionsAPI.ChatCompletionContentPartTextParam
+          | ChatCompletionAssistantMessageParam.ChatCompletionContentPartRefusalParam
+        >
+      | null;
+
+    function_call?: CompletionsAPI.FunctionCall | null;
+
+    name?: string;
+
+    refusal?: string | null;
+
+    tool_calls?: Array<ChatCompletionAssistantMessageParam.ToolCall>;
+  }
+
+  export namespace ChatCompletionAssistantMessageParam {
+    export interface Audio {
+      id: string;
+    }
+
+    export interface ChatCompletionContentPartRefusalParam {
+      refusal: string;
+
+      type: 'refusal';
+    }
+
+    export interface ToolCall {
+      id: string;
+
+      function: ToolCall.Function;
+
+      type: 'function';
+    }
+
+    export namespace ToolCall {
+      export interface Function {
+        arguments: string;
+
+        name: string;
+      }
+    }
+  }
+
+  export interface ChatCompletionToolMessageParam {
+    content: string | Array<CompletionsAPI.ChatCompletionContentPartTextParam>;
+
+    role: 'tool';
+
+    tool_call_id: string;
+  }
+
+  export interface ChatCompletionFunctionMessageParam {
+    content: string | null;
+
+    name: string;
+
+    role: 'function';
+  }
+
+  export interface LogitsProcessorConstructor {
+    qualname: string;
+
+    args?: Array<unknown> | null;
+
+    kwargs?: { [key: string]: unknown } | null;
+  }
+
+  export interface ResponseFormat {
+    type: 'text' | 'json_object' | 'json_schema';
+
+    json_schema?: ResponseFormat.JsonSchema | null;
+
+    [k: string]: unknown;
+  }
+
+  export namespace ResponseFormat {
+    export interface JsonSchema {
+      name: string;
+
+      description?: string | null;
+
+      schema?: { [key: string]: unknown } | null;
+
+      strict?: boolean | null;
+
+      [k: string]: unknown;
+    }
+  }
+
+  export interface StructuralTagResponseFormat {
+    structures: Array<StructuralTagResponseFormat.Structure>;
+
+    triggers: Array<string>;
+
+    type: 'structural_tag';
+
+    [k: string]: unknown;
+  }
+
+  export namespace StructuralTagResponseFormat {
+    export interface Structure {
+      begin: string;
+
+      end: string;
+
+      schema?: { [key: string]: unknown } | null;
+
+      [k: string]: unknown;
+    }
+  }
+
+  /**
+   * Options for controlling streaming behavior. Only used when stream is true.
+   * Controls whether usage statistics are included and how they are reported during
+   * streaming.
+   */
+  export interface StreamOptions {
+    /**
+     * Whether to include usage statistics in each streaming chunk. If true, usage
+     * stats are included continuously as tokens are generated. If false, usage stats
+     * are only included in the final message.
+     */
+    continuous_usage_stats?: boolean | null;
+
+    /**
+     * Whether to include usage statistics in streaming responses. If true, usage
+     * information (tokens used, etc.) will be included in the stream events.
+     */
+    include_usage?: boolean | null;
+
+    [k: string]: unknown;
+  }
+
+  export interface ChatCompletionNamedToolChoiceParam {
+    function: ChatCompletionNamedToolChoiceParam.Function;
+
+    type?: 'function';
+
+    [k: string]: unknown;
+  }
+
+  export namespace ChatCompletionNamedToolChoiceParam {
+    export interface Function {
+      name: string;
+
+      [k: string]: unknown;
+    }
+  }
+
+  export interface Tool {
+    function: Tool.Function;
+
+    type?: 'function';
+
+    [k: string]: unknown;
+  }
+
+  export namespace Tool {
+    export interface Function {
+      name: string;
+
+      description?: string | null;
+
+      parameters?: { [key: string]: unknown } | null;
+
+      [k: string]: unknown;
+    }
+  }
+}
+
+export declare namespace Completions {
+  export {
+    type ChatCompletionContentPartTextParam as ChatCompletionContentPartTextParam,
+    type ChatCompletionLogProb as ChatCompletionLogProb,
+    type FunctionCall as FunctionCall,
+    type CompletionCreateResponse as CompletionCreateResponse,
+    type CompletionCreateParams as CompletionCreateParams,
+  };
+}
